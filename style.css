@@ -1,0 +1,40 @@
+:root { --bar-h: 56px; }
+
+* { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+
+body { margin: 0; }
+
+.topbar{
+  height: var(--bar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.topbar h1{
+  margin: 0;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.topbar a{
+  text-decoration: none;
+  font-size: 14px;
+}
+
+#map{
+  height: calc(100vh - var(--bar-h) - 36px);
+  width: 100%;
+}
+
+.footer{
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-top: 1px solid #e6e6e6;
+  font-size: 12px;
+  color: #444;
+}
