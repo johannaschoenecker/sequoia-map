@@ -9,6 +9,13 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 
 const statusEl = document.getElementById("status");
 
+const sequoiaIcon = L.icon({
+  iconUrl: "icons/sequoia-marker.png",
+  iconSize: [36, 36],        // size of the icon
+  iconAnchor: [18, 34],      // point of the icon which corresponds to marker's location
+  popupAnchor: [0, -30],     // where the popup opens relative to the icon
+});
+
 // Small helper: escape HTML in popup text (basic safety)
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, m => ({
@@ -75,7 +82,7 @@ async function loadTreesFromSheet() {
           </div>
         `;
 
-        const m = L.marker([lat, lng]).bindPopup(html);
+        const m = L.marker([lat, lng], { icon: sequoiaIcon }).bindPopup(html);
         markers.push(m);
       }
 
