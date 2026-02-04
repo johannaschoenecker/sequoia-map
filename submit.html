@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Submit a tree — Se(e)quoia</title>
   <link rel="stylesheet" href="style.css" />
+  <link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+/>
+
 </head>
 <body>
   <header class="topbar">
@@ -24,12 +31,20 @@
         <input name="name" required style="width:100%; padding:10px; margin:6px 0 14px;">
       </label>
 
+      <h2 style="margin-top:18px; font-size:16px;">Pick location</h2>
+      <p style="margin-top:6px;">Tap/click the map to drop a pin. It will fill the latitude/longitude fields.</p>
+      <div id="pickmap" style="height: 320px; border-radius: 12px; overflow: hidden; border: 1px solid #e6e6e6;"></div>
+      <div id="pickmap-hint" style="margin:8px 0 14px; font-size:12px; color:#444;">
+      Tip: if you allow location access, we’ll zoom to where you are.
+      </div>
+
+
       <label>Latitude<br>
-        <input name="lat" required inputmode="decimal" style="width:100%; padding:10px; margin:6px 0 14px;">
+        <input id="lat" name="lat" required inputmode="decimal" style="width:100%; padding:10px; margin:6px 0 14px;">
       </label>
 
       <label>Longitude<br>
-        <input name="lng" required inputmode="decimal" style="width:100%; padding:10px; margin:6px 0 14px;">
+        <input id="lng" name="lng" required inputmode="decimal" style="width:100%; padding:10px; margin:6px 0 14px;">
       </label>
 
       <label>Access<br>
@@ -55,5 +70,56 @@
       <button type="submit" style="padding:10px 14px;">Submit</button>
     </form>
   </main>
+  <script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+
+<script>
+  // Default view: Cambridge
+  const map = L.map("pickmap").setView([52.2053, 0.1218], 13);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors",
+  }).addTo(map);
+
+  const latInput = document.getElementById("lat");
+  const lngInput = document.getElementById("lng");
+
+  let marker = null;
+
+  function setPoint(lat, lng) {
+    // Keep a sensible number of decimals
+    latInput.value = Number(lat).toFixed(6);
+    lngInput.value = Number(lng).toFixed(6);
+
+    if (marker) marker.setLatLng([lat, lng]);
+    else marker = L.marker([lat, lng]).addTo(map);
+
+    marker.bindPopup(`Selected:<br>Lat ${latInput.value}<br>Lng ${lngInput.value}`).openPopup();
+  }
+
+  map.on("click", (e) => {
+    setPoint(e.latlng.lat, e.latlng.lng);
+  });
+
+  // Optional: zoom to user's current location (mobile-friendly)
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        map.setView([lat, lng], 16);
+      },
+      () => {
+        // If they deny permissions, do nothing.
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }
+</script>
+
 </body>
 </html>
