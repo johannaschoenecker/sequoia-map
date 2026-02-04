@@ -16,30 +16,51 @@ function esc(s) {
   }[m]));
 }
 
-async function loadTrees() {
-  try {
-    const res = await fetch("trees.geojson", { cache: "no-store" });
-    if (!res.ok) throw new Error(`Failed to load trees.geojson (${res.status})`);
-    const geojson = await res.json();
+// Put your published Google Sheet CSV URL here:
+const SHEET_CSV_URL = "PASTE_YOUR_PUBLISHED_CSV_URL_HEREhttps://docs.google.com/spreadsheets/d/e/2PACX-1vTSLzdg_Hs8ZArn0krEugTj0SDrGfLgX9OW3vxpmzJcZs-pDnFhgdbK68qfj4kgZb4qX6-hE0DjY7A6/pub?gid=0&single=true&output=csv";
 
-    let shown = 0;
-    let total = 0;
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, m => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+  }[m]));
+}
 
-    const layer = L.geoJSON(geojson, {
-      filter: (feature) => {
+function toNum(x) {
+  const n = Number(x);
+  return Number.isFinite(n) ? n : null;
+}
+
+async function loadTreesFromSheet() {
+  statusEl.textContent = "Loading trees…";
+
+  Papa.parse(SHEET_CSV_URL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: (results) => {
+      const rows = results.data || [];
+
+      let total = 0;
+      let shown = 0;
+
+      const markers = [];
+
+      for (const r of rows) {
         total += 1;
-        const status = feature?.properties?.status?.toLowerCase();
-        const ok = status === "verified";
-        if (ok) shown += 1;
-        return ok;
-      },
-      pointToLayer: (feature, latlng) => L.marker(latlng),
-      onEachFeature: (feature, leafletLayer) => {
-        const p = feature.properties || {};
-        const name = esc(p.name || "Unnamed tree");
-        const access = esc(p.access || "unknown");
-        const notes = esc(p.notes || "");
-        const photoUrl = (p.photo_url || "").trim();
+
+        const status = (r.status || "").trim().toLowerCase();
+        if (status !== "verified") continue;
+
+        const lat = toNum(r.lat);
+        const lng = toNum(r.lng);
+        if (lat === null || lng === null) continue;
+
+        shown += 1;
+
+        const name = esc(r.name || "Unnamed tree");
+        const access = esc(r.access || "unknown");
+        const notes = esc(r.notes || "");
+        const photoUrl = (r.photo_url || "").trim();
 
         const photoHtml = photoUrl
           ? `<div style="margin-top:8px"><img src="${esc(photoUrl)}" alt="${name}" style="max-width:220px;border-radius:8px"/></div>`
@@ -54,19 +75,21 @@ async function loadTrees() {
           </div>
         `;
 
-        leafletLayer.bindPopup(html);
+        const m = L.marker([lat, lng]).bindPopup(html);
+        markers.push(m);
       }
-    }).addTo(map);
 
-    // Fit map view to markers if any are shown
-    const bounds = layer.getBounds();
-    if (bounds.isValid()) map.fitBounds(bounds.pad(0.2));
+      const group = L.featureGroup(markers).addTo(map);
+      if (markers.length) map.fitBounds(group.getBounds().pad(0.2));
 
-    statusEl.textContent = `Showing ${shown} verified trees (out of ${total} total records).`;
-  } catch (err) {
-    console.error(err);
-    statusEl.textContent = "Could not load tree data. Check console for details.";
-  }
+      statusEl.textContent = `Showing ${shown} verified trees (out of ${total} total rows).`;
+    },
+    error: (err) => {
+      console.error(err);
+      statusEl.textContent = "Could not load trees from Google Sheets.";
+    }
+  });
 }
 
-loadTrees();
+loadTreesFromSheet();
+
