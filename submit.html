@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Submit a tree — Se(e)quoia</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Submit a tree</h1>
+    <nav><a href="/">Back to map</a></nav>
+  </header>
+
+  <main style="padding:14px; max-width:720px; margin:0 auto;">
+    <p>
+      Submissions are reviewed before appearing on the map. Please include a photo if you can.
+    </p>
+
+    <form name="tree-submission" method="POST" data-netlify="true" enctype="multipart/form-data">
+      <input type="hidden" name="form-name" value="tree-submission" />
+
+      <label>Tree name / label<br>
+        <input name="name" required style="width:100%; padding:10px; margin:6px 0 14px;">
+      </label>
+
+      <label>Latitude<br>
+        <input name="lat" required inputmode="decimal" style="width:100%; padding:10px; margin:6px 0 14px;">
+      </label>
+
+      <label>Longitude<br>
+        <input name="lng" required inputmode="decimal" style="width:100%; padding:10px; margin:6px 0 14px;">
+      </label>
+
+      <label>Access<br>
+        <select name="access" style="width:100%; padding:10px; margin:6px 0 14px;">
+          <option value="public">Public</option>
+          <option value="viewable_from_public_path">Viewable from public path</option>
+          <option value="private_approximate">Private (approximate only)</option>
+        </select>
+      </label>
+
+      <label>Notes / how to find it<br>
+        <textarea name="notes" rows="4" style="width:100%; padding:10px; margin:6px 0 14px;"></textarea>
+      </label>
+
+      <label>Photo (optional but recommended)<br>
+        <input type="file" name="photo" accept="image/*" style="margin:6px 0 14px;">
+      </label>
+
+      <label>Your email (optional, for follow-up)<br>
+        <input name="email" type="email" style="width:100%; padding:10px; margin:6px 0 14px;">
+      </label>
+
+      <button type="submit" style="padding:10px 14px;">Submit</button>
+    </form>
+  </main>
+</body>
+</html>
