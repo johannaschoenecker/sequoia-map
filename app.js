@@ -2,10 +2,42 @@
 const map = L.map("map").setView([52.2053, 0.1218], 13);
 
 // OpenStreetMap tiles
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
-  attribution: '&copy; OpenStreetMap contributors'
+  attribution: "&copy; OpenStreetMap contributors"
+});
+
+const satellite = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+    maxZoom: 19,
+    attribution: "&copy; Esri"
+  }
+);
+
+const light = L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+  {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap & Carto"
+  }
+);
+
+// Add open streetmap as default basemap
+osm.addTo(map);
+
+// Basemap switching functionality
+const baseMaps = {
+  "Standard map": osm,
+  "Satellite": satellite,
+  "Light map": light
+};
+
+L.control.layers(baseMaps, null, {
+  position: "topright",
+  collapsed: true
 }).addTo(map);
+
 
 const statusEl = document.getElementById("status");
 
