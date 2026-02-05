@@ -23,8 +23,8 @@ const light = L.tileLayer(
   }
 );
 
-// Add open streetmap as default basemap
-osm.addTo(map);
+// Add light theme map as default basemap
+light.addTo(map);
 
 // Basemap switching functionality
 const baseMaps = {
