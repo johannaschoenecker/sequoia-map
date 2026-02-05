@@ -8,22 +8,38 @@ function toLower(x) {
 }
 
 function parseTimestamp(ts) {
-  // Google Forms timestamps often look like: "02/05/2026 14:03:21"
-  // new Date(...) can be locale-sensitive; this tries a couple approaches.
-  const s = (ts ?? "").toString().trim();
-  if (!s) return null;
+  // Expected Google Forms UK format:
+  // "DD/MM/YYYY HH:MM:SS" or "DD/MM/YYYY HH:MM"
+  if (!ts) return null;
 
-  // Try native parse first
-  let d = new Date(s);
-  if (!isNaN(d)) return d;
+  const s = ts.toString().trim();
 
-  // Fallback: mm/dd/yyyy hh:mm:ss (common for Google Forms)
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  const m = s.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/
+  );
+
   if (!m) return null;
-  const [_, mm, dd, yyyy, hh="0", mi="0", ss="0"] = m;
-  d = new Date(Number(yyyy), Number(mm)-1, Number(dd), Number(hh), Number(mi), Number(ss));
-  return isNaN(d) ? null : d;
+
+  const [
+    _,
+    dd,
+    mm,
+    yyyy,
+    hh = "0",
+    min = "0",
+    ss = "0"
+  ] = m;
+
+  return new Date(
+    Number(yyyy),
+    Number(mm) - 1, // JS months are 0-based
+    Number(dd),
+    Number(hh),
+    Number(min),
+    Number(ss)
+  );
 }
+
 
 function startOfMonth(d) {
   return new Date(d.getFullYear(), d.getMonth(), 1);
