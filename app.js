@@ -33,20 +33,35 @@ const baseMaps = {
   "Light map": light
 };
 
-L.control.layers(baseMaps, null, {
-  position: "topright",
-  collapsed: true
-}).addTo(map);
+// Add two arker groups and overlay control (for trees pending approval)
+const approvedLayer = L.layerGroup().addTo(map);
+const pendingLayer = L.layerGroup(); // don't add by default (optional)
+
+L.control.layers(baseMaps, {
+  "Approved trees": approvedLayer,
+  "Pending submissions": pendingLayer
+}, { position: "topright", collapsed: true }).addTo(map);
+
 
 
 const statusEl = document.getElementById("status");
 
+// Add sequoia icon for map
 const sequoiaIcon = L.icon({
   iconUrl: "icons/sequoia-marker.png",
   iconSize: [36, 36],        // size of the icon
   iconAnchor: [18, 34],      // point of the icon which corresponds to marker's location
   popupAnchor: [0, -30],     // where the popup opens relative to the icon
 });
+
+// Add pending icon
+const pendingIcon = L.icon({
+  iconUrl: "icons/sequoia-marker-grey.png",
+  iconSize: [36, 36],
+  iconAnchor: [18, 34],
+  popupAnchor: [0, -30],
+});
+
 
 // Small helper: escape HTML in popup text (basic safety)
 function esc(s) {
@@ -58,11 +73,6 @@ function esc(s) {
 // Put your published Google Sheet CSV URL here:
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8eU3aMyb4r8CzgzSENw67McR_ljvxOW08LmBGC5akvChhzJ-HWII0GEYQxWp9WE2W9pnMAN8wWR-x/pub?gid=1748402674&single=true&output=csv";
 
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, m => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
-  }[m]));
-}
 
 function toNum(x) {
   const n = Number(x);
@@ -100,8 +110,24 @@ async function loadTreesFromSheet() {
         // Fallback to status=verified if you still have that older column
         const status = (r.status ?? r["status"] ?? "").toString().trim().toLowerCase();
 
-        const isApproved = review ? review === "approved" : status === "verified";
-        if (!isApproved) continue;
+        // Normalize moderation states
+        // - approved => show as approved
+        // - pending/blank => show as pending
+        // - rejected => don't show
+        let state = "pending";
+
+        if (review) {
+          if (review === "approved") state = "approved";
+          else if (review === "rejected") state = "rejected";
+          else state = "pending";
+        } else {
+          // fallback legacy column
+          if (status === "verified") state = "approved";
+          else state = "pending";
+        }
+
+        if (state === "rejected") continue;
+
 
         // Handle Google Forms headers: "Latitude", "Longitude"
         const lat = toNum(r.lat ?? r["lat"] ?? r["Latitude"] ?? r["latitude"]);
@@ -148,8 +174,17 @@ async function loadTreesFromSheet() {
           </div>
         `;
 
-        const m = L.marker([lat, lng], { icon: sequoiaIcon }).bindPopup(html);
-        markers.push(m);
+        const icon = (state === "approved") ? sequoiaIcon : pendingIcon;
+        const layer = (state === "approved") ? approvedLayer : pendingLayer;
+
+        // Add a label to the popup so people understand it's pending
+        const statusLabel = (state === "approved")
+          ? `<div style="margin-top:6px; font-size:12px;"><b>Status:</b> Approved</div>`
+          : `<div style="margin-top:6px; font-size:12px;"><b>Status:</b> Pending (not yet verified)</div>`;
+
+        const m = L.marker([lat, lng], { icon }).bindPopup(html + statusLabel);
+        m.addTo(layer);
+
       }
 
       const group = L.featureGroup(markers).addTo(map);
@@ -166,4 +201,8 @@ async function loadTreesFromSheet() {
 
 
 loadTreesFromSheet();
+
+const bounds = approvedLayer.getBounds();
+if (bounds.isValid()) map.fitBounds(bounds.pad(0.2));
+
 
