@@ -44,6 +44,33 @@ body {
   line-height: 1;
 }
 
+/* App icon title */
+.app-title {
+  display: flex;
+  align-items: center;
+}
+
+.app-title img {
+  height: 32px;
+  width: 32px;
+  border-radius: 8px; /* optional, looks nice */
+}
+
+.app-title a {
+  display: inline-flex;
+  align-items: center;
+}
+
+
+/* Slightly larger on desktop */
+@media (min-width: 768px) {
+  .app-title img {
+    height: 36px;
+    width: 36px;
+  }
+}
+
+
 /* Nav container */
 .topbar nav {
   display: flex;
