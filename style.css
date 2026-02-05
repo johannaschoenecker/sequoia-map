@@ -78,12 +78,12 @@ body {
   gap: 8px; /* tighter on mobile */
 }
 
-/* More breathing room on larger screens */
-@media (min-width: 768px) {
-  .topbar nav {
-    gap: 14px;
+@media (max-width: 360px) {
+  .topbar nav a {
+    padding: 8px 10px;
   }
 }
+
 
 
 /* Nav links styled as pill buttons */
