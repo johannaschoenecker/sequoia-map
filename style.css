@@ -75,8 +75,16 @@ body {
 .topbar nav {
   display: flex;
   align-items: center;
-  gap: 14px; /* space between buttons */
+  gap: 8px; /* tighter on mobile */
 }
+
+/* More breathing room on larger screens */
+@media (min-width: 768px) {
+  .topbar nav {
+    gap: 14px;
+  }
+}
+
 
 /* Nav links styled as pill buttons */
 .topbar nav a {
