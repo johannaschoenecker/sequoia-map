@@ -51,8 +51,8 @@ body {
 }
 
 .app-title img {
-  height: 32px;
-  width: 32px;
+  height: 40px;
+  width: 40px;
   border-radius: 8px; /* optional, looks nice */
 }
 
@@ -65,8 +65,8 @@ body {
 /* Slightly larger on desktop */
 @media (min-width: 768px) {
   .app-title img {
-    height: 36px;
-    width: 36px;
+    height: 40px;
+    width: 40px;
   }
 }
 
@@ -75,7 +75,7 @@ body {
 .topbar nav {
   display: flex;
   align-items: center;
-  gap: 6px; /* tighter on mobile */
+  gap: 2px; /* tighter on mobile */
 }
 
 @media (max-width: 360px) {
