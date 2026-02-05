@@ -31,11 +31,12 @@ body {
   height: var(--bar-h);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start; /* ← key change */
   padding: 0 14px;
   border-bottom: 1px solid var(--border);
-  gap: 12px;
+  gap: 10px; /* space between icon and buttons */
 }
+
 
 .topbar h1 {
   margin: 0;
