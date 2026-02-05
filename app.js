@@ -72,7 +72,11 @@ function toNum(x) {
 async function loadTreesFromSheet() {
   statusEl.textContent = "Loading trees…";
 
-  Papa.parse(SHEET_CSV_URL, {
+  // Cache-bust so edits in Sheets appear immediately
+  const urlWithBust =
+    SHEET_CSV_URL + (SHEET_CSV_URL.includes("?") ? "&" : "?") + "v=" + Date.now();
+
+  Papa.parse(urlWithBust, {
     download: true,
     header: true,
     skipEmptyLines: true,
@@ -87,19 +91,49 @@ async function loadTreesFromSheet() {
       for (const r of rows) {
         total += 1;
 
-        const status = (r.status || "").trim().toLowerCase();
-        if (status !== "verified") continue;
+        // Prefer review_status=approved (your moderation flow)
+        const review = (r.review_status ?? r["review_status"] ?? r["Review status"] ?? r["Review Status"] ?? "")
+          .toString()
+          .trim()
+          .toLowerCase();
 
-        const lat = toNum(r.lat);
-        const lng = toNum(r.lng);
+        // Fallback to status=verified if you still have that older column
+        const status = (r.status ?? r["status"] ?? "").toString().trim().toLowerCase();
+
+        const isApproved = review ? review === "approved" : status === "verified";
+        if (!isApproved) continue;
+
+        // Handle Google Forms headers: "Latitude", "Longitude"
+        const lat = toNum(r.lat ?? r["lat"] ?? r["Latitude"] ?? r["latitude"]);
+        const lng = toNum(r.lng ?? r["lng"] ?? r["Longitude"] ?? r["longitude"]);
         if (lat === null || lng === null) continue;
 
         shown += 1;
 
-        const name = esc(r.name || "Unnamed tree");
-        const access = esc(r.access || "unknown");
-        const notes = esc(r.notes || "");
-        const photoUrl = (r.photo_url || "").trim();
+        const name = esc(
+          r.name ??
+          r["name"] ??
+          r["Tree name / label"] ??
+          r["Tree name"] ??
+          "Unnamed tree"
+        );
+
+        const access = esc(
+          r.access ??
+          r["access"] ??
+          r["Access"] ??
+          "unknown"
+        );
+
+        const notes = esc(
+          r.notes ??
+          r["notes"] ??
+          r["Notes / how to find it"] ??
+          r["Notes"] ??
+          ""
+        );
+
+        const photoUrl = (r.photo_url ?? r["photo_url"] ?? r["Photo URL"] ?? r["photo"] ?? "").toString().trim();
 
         const photoHtml = photoUrl
           ? `<div style="margin-top:8px"><img src="${esc(photoUrl)}" alt="${name}" style="max-width:220px;border-radius:8px"/></div>`
@@ -121,7 +155,7 @@ async function loadTreesFromSheet() {
       const group = L.featureGroup(markers).addTo(map);
       if (markers.length) map.fitBounds(group.getBounds().pad(0.2));
 
-      statusEl.textContent = `Showing ${shown} verified trees (out of ${total} total rows).`;
+      statusEl.textContent = `Showing ${shown} approved/verified trees (out of ${total} total rows).`;
     },
     error: (err) => {
       console.error(err);
@@ -129,6 +163,7 @@ async function loadTreesFromSheet() {
     }
   });
 }
+
 
 loadTreesFromSheet();
 
