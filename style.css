@@ -51,8 +51,8 @@ body {
 }
 
 .app-title img {
-  height: 40px;
-  width: 40px;
+  height: 50px;
+  width: 50px;
   border-radius: 8px; /* optional, looks nice */
 }
 
@@ -65,8 +65,8 @@ body {
 /* Slightly larger on desktop */
 @media (min-width: 768px) {
   .app-title img {
-    height: 40px;
-    width: 40px;
+    height: 50px;
+    width: 50px;
   }
 }
 
