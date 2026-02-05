@@ -34,7 +34,7 @@ body {
   justify-content: flex-start; /* ← key change */
   padding: 0 10px 0 6px; 
   border-bottom: 1px solid var(--border);
-  gap: 10px; /* space between icon and buttons */
+  gap: 6px; /* space between icon and buttons */
 }
 
 
