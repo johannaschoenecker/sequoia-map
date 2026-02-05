@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Submit a tree — Se(e)quoia</title>
   <link rel="stylesheet" href="style.css" />
-  <link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-  crossorigin=""
-/>
 
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
 </head>
+
 <body>
   <header class="topbar">
     <h1>Submit a tree</h1>
@@ -21,105 +23,144 @@
 
   <main style="padding:14px; max-width:720px; margin:0 auto;">
     <p>
-      Submissions are reviewed before appearing on the map. Please include a photo if you can.
+      Submissions are reviewed before appearing on the map.
+      Pick the location here, then you’ll be taken to a short Google Form to finish (including photo upload).
     </p>
 
-    <form name="tree-submission" method="POST" data-netlify="true" enctype="multipart/form-data">
-      <input type="hidden" name="form-name" value="tree-submission" />
+    <label>Tree name / label (optional here — you can also add it on the next page)<br>
+      <input id="name" style="width:100%; padding:10px; margin:6px 0 14px;">
+    </label>
 
-      <label>Tree name / label<br>
-        <input name="name" required style="width:100%; padding:10px; margin:6px 0 14px;">
-      </label>
+    <h2 style="margin-top:10px; font-size:16px;">Pick location</h2>
+    <p style="margin-top:6px;">
+      Tap/click the map to drop a pin. It will fill the latitude/longitude fields.
+    </p>
 
-      <h2 style="margin-top:18px; font-size:16px;">Pick location</h2>
-      <p style="margin-top:6px;">Tap/click the map to drop a pin. It will fill the latitude/longitude fields.</p>
-      <div id="pickmap" style="height: 320px; border-radius: 12px; overflow: hidden; border: 1px solid #e6e6e6;"></div>
-      <div id="pickmap-hint" style="margin:8px 0 14px; font-size:12px; color:#444;">
+    <div id="pickmap" style="height: 320px; border-radius: 12px; overflow: hidden; border: 1px solid #e6e6e6;"></div>
+    <div style="margin:8px 0 14px; font-size:12px; color:#444;">
       Tip: if you allow location access, we’ll zoom to where you are.
-      </div>
+    </div>
 
-
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
       <label>Latitude<br>
-        <input id="lat" name="lat" required inputmode="decimal" style="width:100%; padding:10px; margin:6px 0 14px;">
+        <input id="lat" inputmode="decimal" placeholder="Tap the map…" style="width:100%; padding:10px; margin:6px 0 14px;">
       </label>
 
       <label>Longitude<br>
-        <input id="lng" name="lng" required inputmode="decimal" style="width:100%; padding:10px; margin:6px 0 14px;">
+        <input id="lng" inputmode="decimal" placeholder="Tap the map…" style="width:100%; padding:10px; margin:6px 0 14px;">
       </label>
+    </div>
 
-      <label>Access<br>
-        <select name="access" style="width:100%; padding:10px; margin:6px 0 14px;">
-          <option value="public">Public</option>
-          <option value="viewable_from_public_path">Viewable from public path</option>
-          <option value="private_approximate">Private (approximate only)</option>
-        </select>
-      </label>
+    <label>Access (optional)<br>
+      <select id="access" style="width:100%; padding:10px; margin:6px 0 14px;">
+        <option value="">(choose…)</option>
+        <option value="Public">Public</option>
+        <option value="Viewable from public path">Viewable from public path</option>
+        <option value="Private (approximate only)">Private (approximate only)</option>
+      </select>
+    </label>
 
-      <label>Notes / how to find it<br>
-        <textarea name="notes" rows="4" style="width:100%; padding:10px; margin:6px 0 14px;"></textarea>
-      </label>
+    <label>Notes / how to find it (optional)<br>
+      <textarea id="notes" rows="4" style="width:100%; padding:10px; margin:6px 0 14px;"></textarea>
+    </label>
 
-      <label>Photo (optional but recommended)<br>
-        <input type="file" name="photo" accept="image/*" style="margin:6px 0 14px;">
-      </label>
+    <label>Your email (optional, for follow-up)<br>
+      <input id="email" type="email" style="width:100%; padding:10px; margin:6px 0 14px;">
+    </label>
 
-      <label>Your email (optional, for follow-up)<br>
-        <input name="email" type="email" style="width:100%; padding:10px; margin:6px 0 14px;">
-      </label>
+    <button id="continueBtn" type="button" style="padding:12px 16px;">
+      Continue to photo upload & submit
+    </button>
 
-      <button type="submit" style="padding:10px 14px;">Submit</button>
-    </form>
+    <p style="margin-top:10px; font-size:12px; color:#444;">
+      Note: photo upload happens on the next page (Google Form). This page only collects the location nicely.
+    </p>
   </main>
+
+  <!-- Leaflet JS -->
   <script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-  crossorigin=""
-></script>
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
 
-<script>
-  // Default view: Cambridge
-  const map = L.map("pickmap").setView([52.2053, 0.1218], 13);
+  <script>
+    // ==== 1) MAP PICKER ====
+    const map = L.map("pickmap").setView([52.2053, 0.1218], 13);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors",
-  }).addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
 
-  const latInput = document.getElementById("lat");
-  const lngInput = document.getElementById("lng");
+    const latInput = document.getElementById("lat");
+    const lngInput = document.getElementById("lng");
+    let marker = null;
 
-  let marker = null;
+    function setPoint(lat, lng) {
+      latInput.value = Number(lat).toFixed(6);
+      lngInput.value = Number(lng).toFixed(6);
 
-  function setPoint(lat, lng) {
-    // Keep a sensible number of decimals
-    latInput.value = Number(lat).toFixed(6);
-    lngInput.value = Number(lng).toFixed(6);
+      if (marker) marker.setLatLng([lat, lng]);
+      else marker = L.marker([lat, lng]).addTo(map);
 
-    if (marker) marker.setLatLng([lat, lng]);
-    else marker = L.marker([lat, lng]).addTo(map);
+      marker.bindPopup(`Selected:<br>Lat ${latInput.value}<br>Lng ${lngInput.value}`).openPopup();
+    }
 
-    marker.bindPopup(`Selected:<br>Lat ${latInput.value}<br>Lng ${lngInput.value}`).openPopup();
-  }
+    map.on("click", (e) => setPoint(e.latlng.lat, e.latlng.lng));
 
-  map.on("click", (e) => {
-    setPoint(e.latlng.lat, e.latlng.lng);
-  });
+    // Optional: zoom to user's current location (mobile-friendly)
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => map.setView([pos.coords.latitude, pos.coords.longitude], 16),
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    }
 
-  // Optional: zoom to user's current location (mobile-friendly)
-  if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        map.setView([lat, lng], 16);
-      },
-      () => {
-        // If they deny permissions, do nothing.
-      },
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
-  }
-</script>
+    // ==== 2) GOOGLE FORM HANDOFF ====
+    // Your pre-filled link base (keep as-is):
+    const FORM_BASE =
+      "https://docs.google.com/forms/d/e/1FAIpQLSeT4WYjiM_3o02lm5p6zfpsIIau8M4HJgQaam4sR_VfG5QEJw/viewform?usp=pp_url";
 
+    // These two we KNOW from your prefill link:
+    const LAT_ENTRY = "entry.467123457";
+    const LNG_ENTRY = "entry.450821125";
+
+    // OPTIONAL: if you want to prefill name/access/notes/email too,
+    // get their entry IDs via “Get pre-filled link” and paste them here:
+    // const NAME_ENTRY = "entry.xxxxx";
+    // const ACCESS_ENTRY = "entry.xxxxx";
+    // const NOTES_ENTRY = "entry.xxxxx";
+    // const EMAIL_ENTRY = "entry.xxxxx";
+
+    document.getElementById("continueBtn").addEventListener("click", () => {
+      const lat = latInput.value.trim();
+      const lng = lngInput.value.trim();
+
+      if (!lat || !lng) {
+        alert("Please tap the map to select a location first.");
+        return;
+      }
+
+      const url = new URL(FORM_BASE);
+      url.searchParams.set(LAT_ENTRY, lat);
+      url.searchParams.set(LNG_ENTRY, lng);
+
+      // Optional prefills (uncomment + set IDs above if you want)
+      const name = document.getElementById("name").value.trim();
+      const access = document.getElementById("access").value.trim();
+      const notes = document.getElementById("notes").value.trim();
+      const email = document.getElementById("email").value.trim();
+
+      // Example of how you'd add these once you know the IDs:
+      // if (name) url.searchParams.set(NAME_ENTRY, name);
+      // if (access) url.searchParams.set(ACCESS_ENTRY, access);
+      // if (notes) url.searchParams.set(NOTES_ENTRY, notes);
+      // if (email) url.searchParams.set(EMAIL_ENTRY, email);
+
+      window.location.href = url.toString();
+    });
+  </script>
 </body>
 </html>

@@ -56,7 +56,7 @@ function esc(s) {
 }
 
 // Put your published Google Sheet CSV URL here:
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS_GqJd1DJ56Qs1JxkOhttuKbm1qwMlDTxZk8d6er2tbFe2wMegfqfxkG5W1Tp8uPPsXzvxKI-Twk9I/pub?gid=0&single=true&output=csv";
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8eU3aMyb4r8CzgzSENw67McR_ljvxOW08LmBGC5akvChhzJ-HWII0GEYQxWp9WE2W9pnMAN8wWR-x/pub?gid=1748402674&single=true&output=csv";
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, m => ({
