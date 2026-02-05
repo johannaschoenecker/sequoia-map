@@ -46,6 +46,31 @@ L.control.layers(baseMaps, {
 
 const statusEl = document.getElementById("status");
 
+let treePoints = [];          // [{lat, lng, name, marker, state}]
+let userMarker = null;
+let nearestLine = null;
+
+function haversineMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // meters
+  const toRad = (d) => (d * Math.PI) / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function formatDistance(m) {
+  if (!Number.isFinite(m)) return "";
+  if (m < 1000) return `${Math.round(m)} m`;
+  return `${(m / 1000).toFixed(2)} km`;
+}
+
+
 // Add sequoia icon for map
 const sequoiaIcon = L.icon({
   iconUrl: "icons/sequoia-marker.png",
@@ -91,6 +116,8 @@ async function loadTreesFromSheet() {
     header: true,
     skipEmptyLines: true,
     complete: (results) => {
+      // RESET stored tree list on each reload
+      treePoints = [];
       const rows = results.data || [];
 
       let total = 0;
@@ -183,7 +210,16 @@ async function loadTreesFromSheet() {
           : `<div style="margin-top:6px; font-size:12px;"><b>Status:</b> Pending (not yet verified)</div>`;
 
         const m = L.marker([lat, lng], { icon }).bindPopup(html + statusLabel);
+
         m.addTo(layer);
+
+        treePoints.push({
+        lat,
+        lng,
+        name: String(name),
+        marker: m,
+        state
+        });
 
       }
 
@@ -201,6 +237,74 @@ async function loadTreesFromSheet() {
 
 
 loadTreesFromSheet();
+
+function findNearestTree() {
+  if (!("geolocation" in navigator)) {
+    alert("Geolocation isn’t available in this browser.");
+    return;
+  }
+
+  if (!treePoints.length) {
+    alert("Trees haven’t loaded yet—try again in a moment.");
+    return;
+  }
+
+  statusEl.textContent = "Getting your location…";
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const uLat = pos.coords.latitude;
+      const uLng = pos.coords.longitude;
+
+      // Add/update user marker
+      if (userMarker) userMarker.setLatLng([uLat, uLng]);
+      else userMarker = L.circleMarker([uLat, uLng], { radius: 8 }).addTo(map);
+
+      // Find nearest (by distance)
+      let best = null;
+      let bestD = Infinity;
+
+      for (const t of treePoints) {
+        const d = haversineMeters(uLat, uLng, t.lat, t.lng);
+        if (d < bestD) {
+          bestD = d;
+          best = t;
+        }
+      }
+
+      if (!best) {
+        statusEl.textContent = "No trees found.";
+        return;
+      }
+
+      // Optional: draw a line to nearest
+      if (nearestLine) map.removeLayer(nearestLine);
+      nearestLine = L.polyline([[uLat, uLng], [best.lat, best.lng]]).addTo(map);
+
+      // Zoom to show both points
+      const bounds = L.latLngBounds([[uLat, uLng], [best.lat, best.lng]]);
+      map.fitBounds(bounds.pad(0.25));
+
+      // Open the nearest tree popup
+      best.marker.openPopup();
+
+      statusEl.textContent = `Nearest: ${best.name} (${formatDistance(bestD)})`;
+    },
+    (err) => {
+      console.error(err);
+      statusEl.textContent = "Couldn’t get your location.";
+      alert("Couldn’t get your location. You may need to allow location access in your browser settings.");
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+
+document.getElementById("nearestBtn")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  findNearestTree();
+});
+
 
 const bounds = approvedLayer.getBounds();
 if (bounds.isValid()) map.fitBounds(bounds.pad(0.2));
