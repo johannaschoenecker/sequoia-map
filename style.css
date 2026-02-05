@@ -32,7 +32,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start; /* ← key change */
-  padding: 0 14px;
+  padding: 0 10px 0 6px; 
   border-bottom: 1px solid var(--border);
   gap: 10px; /* space between icon and buttons */
 }
@@ -52,8 +52,8 @@ body {
 }
 
 .app-title img {
-  height: 50px;
-  width: 50px;
+  height: 45px;
+  width: 45px;
   border-radius: 8px; /* optional, looks nice */
 }
 
