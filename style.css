@@ -1,45 +1,123 @@
-:root { --bar-h: 56px; }
+:root {
+  --bar-h: 56px;
 
-* { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+  /* neutrals */
+  --border: #e6e6e6;
+  --text: #111;
+  --muted: #444;
 
-body { margin: 0; }
+  /* UI */
+  --btn-bg: #f5f7f6;
+  --btn-bg-hover: #eef3f1;
+  --btn-border: #e0e6e3;
 
-.topbar{
+  /* accent */
+  --accent-bg: #e6f2ec;
+  --accent-border: #cfe3d9;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+}
+
+/* ---------- Top bar ---------- */
+.topbar {
   height: var(--bar-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 14px;
-  border-bottom: 1px solid #e6e6e6;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
 }
 
-.topbar h1{
+.topbar h1 {
   margin: 0;
   font-size: 16px;
   font-weight: 650;
+  line-height: 1;
 }
 
-.topbar a{
-  text-decoration: none;
+/* Nav container */
+.topbar nav {
+  display: flex;
+  align-items: center;
+  gap: 14px; /* space between buttons */
+}
+
+/* Nav links styled as pill buttons */
+.topbar nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 14px;
+  min-height: 36px;
+
+  border-radius: 999px; /* pill shape */
+  background: var(--btn-bg);
+  border: 1px solid var(--btn-border);
+
   font-size: 14px;
+  line-height: 1;
+  text-decoration: none;
+  color: inherit;
+
+  white-space: nowrap;
 }
 
-#map{
+.topbar nav a:hover {
+  background: var(--btn-bg-hover);
+}
+
+/* Optional: make one action "primary" (e.g., Add a tree) */
+.topbar nav a.primary {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+  font-weight: 650;
+}
+
+/* Icon inside nav buttons */
+.topbar nav a .icon {
+  display: inline-flex;
+  width: 1.05em;
+  justify-content: center;
+  margin-right: 8px;
+  transform: translateY(-0.5px); /* tiny optical alignment */
+}
+
+/* Desktop breathing room */
+@media (min-width: 768px) {
+  .topbar nav a {
+    padding: 10px 18px;
+    font-size: 15px;
+    min-height: 40px;
+  }
+}
+
+/* ---------- Map + footer ---------- */
+#map {
   height: calc(100vh - var(--bar-h) - 36px);
   width: 100%;
 }
 
-.footer{
+.footer {
   height: 36px;
   display: flex;
   align-items: center;
   padding: 0 14px;
-  border-top: 1px solid #e6e6e6;
+  border-top: 1px solid var(--border);
   font-size: 12px;
-  color: #444;
+  color: var(--muted);
 }
 
-
+/* ---------- Menu page cards ---------- */
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -50,14 +128,14 @@ body { margin: 0; }
   display: block;
   padding: 18px;
   border-radius: 14px;
-  background: #f5f7f6;
+  background: var(--btn-bg);
   text-decoration: none;
   color: inherit;
-  border: 1px solid #e0e6e3;
+  border: 1px solid var(--btn-border);
 }
 
 .menu-card:hover {
-  background: #eef3f1;
+  background: var(--btn-bg-hover);
 }
 
 .menu-emoji {
@@ -73,18 +151,5 @@ body { margin: 0; }
 
 .menu-desc {
   font-size: 14px;
-  color: #444;
-}
-
-
-.topbar nav {
-  display: flex;
-  gap: 24px;
-}
-
-.topbar nav a {
-  padding: 6px 10px;
-  border-radius: 10px;
-  background: #19af46;
-  border: 1px solid #f3f8f5;
+  color: var(--muted);
 }
